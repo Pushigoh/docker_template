@@ -16,7 +16,7 @@ touch $imagedir/build.sh
 touch $imagedir/run.sh
 mkdir $imagedir/storage
 
-#Create build.sh
+#create Dockerfile
 ##If $2 is null, default to ubuntu:latest
 if [ -z "$2" ]
 then
@@ -27,17 +27,26 @@ fi
 ##Update package manager, install basic utilities, create storage volume
 echo "RUN apt-get update && apt-get upgrade -y" >> $imagedir/Dockerfile
 echo "RUN apt-get install redis-tools -y" >> $imagedir/Dockerfile
+echo "RUN apt-get install vim -y" >> $imagedir/Dockerfile
 echo "RUN mkdir /storage" >> $imagedir/Dockerfile
 
+#Create build.sh
 echo "docker build -t $1 ." >> $imagedir/build.sh
 
 #Create run.sh
 ##Runs with interactive shell, removes container on exit
 ###Runs detached if passed -d
 cat >$imagedir/run.sh << EOL
-if [ "\$imagedir" = '-d' ]
+re='^[0-9]+$'
+if [ "\$1" = '-d' ]
 then
   docker run -v $imagedir/storage:/storage -d $1 
+elif [[ "\$1" =~ \$re ]]
+then
+  for i in {1..\$1}
+    do
+      docker run -d $1 
+    done
 else
   docker run -v $imagedir/storage:/storage -it --rm $1 
 fi
@@ -45,3 +54,4 @@ EOL
 
 #Grant permissions to execute run.sh && build.sh
 chmod +x $imagedir/run.sh && chmod +x $imagedir/build.sh
+
