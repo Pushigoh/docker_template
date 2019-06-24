@@ -8,36 +8,40 @@ then
     exit
 fi
 
+imagedir="$(pwd)/${1}"
 #Create base files
-mkdir $1
-touch $1/Dockerfile
-touch $1/build.sh
-touch $1/run.sh
+mkdir $imagedir
+touch $imagedir/Dockerfile
+touch $imagedir/build.sh
+touch $imagedir/run.sh
+mkdir $imagedir/storage
 
-#If $2 is null, default to ubuntu:latest
+#Create build.sh
+##If $2 is null, default to ubuntu:latest
 if [ -z "$2" ]
 then
-    echo "FROM ubuntu:latest" >> $1/Dockerfile
+    echo "FROM ubuntu:latest" >> "$imagedir/Dockerfile"
 else
-    echo "FROM $2" >> $1/Dockerfile
+    echo "FROM $2" >> "$imagedir/Dockerfile"
 fi
+##Update package manager, install basic utilities, create storage volume
+echo "RUN apt-get update && apt-get upgrade -y" >> $imagedir/Dockerfile
+echo "RUN apt-get install redis-tools -y" >> $imagedir/Dockerfile
+echo "RUN mkdir /storage" >> $imagedir/Dockerfile
 
-#Update package manager, install basic utilities
-echo "RUN apt-get update && apt-get upgrade -y" >> $1/Dockerfile
-echo "RUN apt-get install redis-tools -y" >> $1/Dockerfile
+echo "docker build -t $1 ." >> $imagedir/build.sh
 
-echo "docker build -t $1 ." >> $1/build.sh
-
-#Runs with interactive shell, removes container on exit
+#Create run.sh
+##Runs with interactive shell, removes container on exit
 ###Runs detached if passed -d
-cat >$1/run.sh << EOL
-if [ "\$1" = '-d' ]
+cat >$imagedir/run.sh << EOL
+if [ "\$imagedir" = '-d' ]
 then
-  docker run -d $1
+  docker run -v $imagedir/storage:/storage -d $1 
 else
-  docker run -it --rm $1
+  docker run -v $imagedir/storage:/storage -it --rm $1 
 fi
 EOL
 
 #Grant permissions to execute run.sh && build.sh
-chmod +x $1/run.sh && chmod +x $1/build.sh
+chmod +x $imagedir/run.sh && chmod +x $imagedir/build.sh
