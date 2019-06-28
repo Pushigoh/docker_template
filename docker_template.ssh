@@ -28,6 +28,7 @@ fi
 echo "RUN apt-get update && apt-get upgrade -y" >> $imagedir/Dockerfile
 echo "RUN apt-get install redis-tools -y" >> $imagedir/Dockerfile
 echo "RUN apt-get install vim -y" >> $imagedir/Dockerfile
+echo "RUN apt-get install git -y" >> $imagedir/Dockerfile
 echo "RUN mkdir /storage" >> $imagedir/Dockerfile
 
 #Create build.sh
