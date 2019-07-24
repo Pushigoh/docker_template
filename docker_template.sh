@@ -37,6 +37,8 @@ echo "RUN apt-get install man -y" >> $imagedir/Dockerfile
 echo "RUN apt-get install redis-tools -y" >> $imagedir/Dockerfile
 echo "RUN apt-get install vim -y" >> $imagedir/Dockerfile
 echo "RUN apt-get install git -y" >> $imagedir/Dockerfile
+echo "RUN apt-get install wget -y" >> $imagedir/Dockerfile
+echo "RUN echo \"PS1='root@${1}: '\" >> ~/.bashrc" >> $imagedir/Dockerfile
 echo "RUN mkdir /storage" >> $imagedir/Dockerfile
 
 #Create build.sh
