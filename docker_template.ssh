@@ -25,11 +25,22 @@ else
     echo "FROM $2" >> "$imagedir/Dockerfile"
 fi
 ##Update package manager, install basic utilities, create storage volume
-echo "RUN apt-get update && apt-get upgrade -y" >> $imagedir/Dockerfile
-echo "RUN apt-get install redis-tools -y" >> $imagedir/Dockerfile
-echo "RUN apt-get install vim -y" >> $imagedir/Dockerfile
-echo "RUN apt-get install git -y" >> $imagedir/Dockerfile
-echo "RUN mkdir /storage" >> $imagedir/Dockerfile
+function fillutils {
+	utilities=(
+	redis-tools
+	vim
+	git
+	wget
+	)
+	echo "RUN apt-get update && apt-get upgrade -y" >> $imagedir/Dockerfile
+	for i in ${utilities[@]}
+	do
+		echo "RUN apt-get install $i -y" >> $imagedir/Dockerfile
+		echo "RUN apt-get install $i -y"
+	done
+	echo "RUN wget https://raw.githubusercontent.com/Pushigoh/vimrc/master/.vimrc" >> $imagedir/Dockerfile
+}
+fillutils
 
 #Create build.sh
 echo "docker build -t $1 ." >> $imagedir/build.sh
